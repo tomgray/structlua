@@ -4,15 +4,15 @@
 
 ## Why structlua?
 
-Lua is a popular choice for embedding dynamic configuration, policy rules, and plugin scripts into Go applications. However, extracting nested configuration tables out of a Lua VM into Go types typically requires tedious, error-prone boilerplate—manually pushing/popping stack indices, iterating tables, checking types, and converting numbers.
+Lua is a great choice for a configuration language for Go applications. However, extracting nested configuration tables out of a Lua VM stack into Go types typically requires a bunch of stack operations, type checks and other boilerplate code.
 
 `structlua` solves this by providing familiar `encoding/json`-style unmarshaling directly from Lua values into Go types:
 
 - **Ergonomic Struct Mapping**: Map fields using `lua:"..."` struct tags or rely on automatic exact and case-insensitive field name matching.
-- **Zero-Dependency Core & Pluggable Lua VMs**: The core `github.com/tomgray/structlua` package relies solely on the Go standard library. Lightweight adapter submodules are provided for [`github.com/yuin/gopher-lua`](https://github.com/yuin/gopher-lua) and [`github.com/Shopify/go-lua`](https://github.com/Shopify/go-lua), so your project only imports the Lua VM it actually uses.
 - **First-Class Polymorphism**: Unmarshal Lua tables into Go interfaces based on a discriminator field (e.g. `type = "webhook"`), with support for both direct concrete types and DTO-to-domain constructor functions.
 - **Extensible Type Handlers**: Implement `LuaUnmarshaler` on your own types, or register custom handlers for standard library and third-party types (like `time.Time` or `time.Duration`).
 - **Strict Type & Bounds Checking**: Validates contiguous 1-based Lua arrays when targeting Go slices/arrays, checks integer and float overflow bounds (`int8`, `uint8`, `float32`, etc.), and rejects negative values for unsigned integers.
+- **Zero-Dependency Core & Pluggable Lua VMs**: The core `github.com/tomgray/structlua` package relies solely on the Go standard library. Lightweight adapter submodules are provided for [`github.com/yuin/gopher-lua`](https://github.com/yuin/gopher-lua) and [`github.com/Shopify/go-lua`](https://github.com/Shopify/go-lua), so your project only imports the Lua VM it actually uses.
 
 ---
 
@@ -156,14 +156,14 @@ type Config struct {
 
 ### Supported Types
 
-| Lua Type | Supported Go Target Types | Notes |
-| :--- | :--- | :--- |
-| `string` | `string`, `*string`, `any` | |
-| `boolean` | `bool`, `*bool`, `any` | |
-| `number` | `int`, `int8`..`int64`, `uint`, `uint8`..`uint64`, `float32`, `float64`, `any` | Verifies integer/float range and rejects negative numbers for `uint*`. Unmarshals as `float64` into `any`. |
-| `table` (array) | `[]T`, `[N]T`, `any` | Must have contiguous integer keys starting at `1` (`1..N`). Unmarshals non-empty arrays as `[]any` when targeting `any`. |
-| `table` (object) | `struct`, `map[string]T`, `any` | Table keys must be strings. Empty tables `{}` unmarshal into `[]T` as `[]T{}` and into `any` as `map[string]any{}`. |
-| `nil` | `*T`, `any` | Sets pointer fields to `nil`. |
+| Lua Type         | Supported Go Target Types                                                      | Notes                                                                                                                    |
+| :--------------- | :----------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `string`         | `string`, `*string`, `any`                                                     |                                                                                                                          |
+| `boolean`        | `bool`, `*bool`, `any`                                                         |                                                                                                                          |
+| `number`         | `int`, `int8`..`int64`, `uint`, `uint8`..`uint64`, `float32`, `float64`, `any` | Verifies integer/float range and rejects negative numbers for `uint*`. Unmarshals as `float64` into `any`.               |
+| `table` (array)  | `[]T`, `[N]T`, `any`                                                           | Must have contiguous integer keys starting at `1` (`1..N`). Unmarshals non-empty arrays as `[]any` when targeting `any`. |
+| `table` (object) | `struct`, `map[string]T`, `any`                                                | Table keys must be strings. Empty tables `{}` unmarshal into `[]T` as `[]T{}` and into `any` as `map[string]any{}`.      |
+| `nil`            | `*T`, `any`                                                                    | Sets pointer fields to `nil`.                                                                                            |
 
 ### Custom Unmarshaling with `LuaUnmarshaler`
 
